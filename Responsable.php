@@ -34,6 +34,46 @@ class Responsable extends Persona {
         return $this->numeroLicencia;
     }
 
+
+    public function listar($condicion = ""){
+        $arregloResponsable = null;
+        $base = new BaseDatos();
+        $consultaResponsable = "SELECT * FROM responsable ";
+        if ($condicion != "") {
+            $consultaResponsable = $consultaResponsable . ' WHERE ' . $condicion;
+        }
+        $consultaResponsable .= " ORDER BY apellido ";
+        if ($base->Iniciar()) {
+            if ($base->Ejecutar($consultaResponsable)) {
+                $arregloResponsable = array();
+                while ($row2 = $base->Registro()) {
+                    $NroDoc = $row2['nrodoc'];
+                    $numeroEmpleado = $row2['numeroEmpleado'];
+                    $numeroLicencia = $row2['numeroLicencia'];
+                    
+                    $Responsable = new Responsable();   
+                    $persona = parent::listar("nrodoc = ".$NroDoc);
+                    /**
+                     *  CLAVES PARAM
+                     *   $this->setNrodoc($param['nrodoc']);
+                     *   $this->setNombre($param['nomb']);
+                     *   $this->setApellido($param['ape']);
+                     *   $this->setTelefono($param['tel']);
+                     */
+
+                    //['nomb'=>$Nombre, 'nrodoc' => $NroDoc, 'ape' => $Apellido, 'tel' => $Telefono]
+                    $Responsable->cargar(['nrodoc' => $NroDoc, 'nomb'=> $persona["nomb"], 'ape'=> $persona["ape"], 'tel' => $persona["tel"]]);   
+                    array_push($arregloResponsable, $Responsable);
+                }
+            } else {
+                $this->setmensajeoperacion($base->getError());
+            }
+        } else {
+            $this->setmensajeoperacion($base->getError());
+        }
+        return $arregloResponsable;
+    }
+
     public function buscar($nrodoc){
         $base = new BaseDatos();
         $consultaResponsable = "SELECT * FROM responsable WHERE numeroDocumentoRes = " . parent::getNrodoc();

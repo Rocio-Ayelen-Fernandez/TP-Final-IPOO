@@ -62,7 +62,10 @@ class Pasajero extends Persona {
                     $NroDoc = $row2['nrodoc'];
                     $idViaje = $row2['idViaje'];
                     $pasajero = new Pasajero();
-                    $pasajero->cargar([/**'nomb'=>$Nombre, */ 'nrodoc' => $NroDoc, /*'ape' => $Apellido, 'tel' => $Telefono,*/ "objViaje"=>$idViaje]);
+
+                    $persona = parent::listar("nrodoc = ".$NroDoc);
+                    $pasajero->cargar(['nomb'=> $persona["nomb"], 'nrodoc' => $NroDoc, 'ape'=> $persona["ape"], 'tel' => $persona["tel"], "objViaje"=>$idViaje]);
+                    
                     array_push($arregloPasajero, $pasajero);
                 }
             } else {
@@ -83,7 +86,7 @@ class Pasajero extends Persona {
         $base = new BaseDatos();
         $resp = false;
         // Se insertan los datos del pasajero en la tabla pasajero
-        $consultaInsertar = "INSERT INTO pasajero (numdocPasajero, idViaje) VALUES ('" . parent::getNrodoc() ."','" .$this->getObjViaje()->getIdviaje().")";
+        $consultaInsertar = "INSERT INTO pasajero (numdocPasajero, idviaje) VALUES ('" . parent::getNrodoc() ."','" .$this->getObjViaje()->getIdviaje().")";
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaInsertar)) {
                 $resp = true;
@@ -104,7 +107,7 @@ class Pasajero extends Persona {
         $resp = false;
         $base = new BaseDatos();
         // Se actualizan los datos del pasajero en la tabla pasajero
-        $consultaModifica = "UPDATE pasajero SET numdocPasajero= ". $this->getNrodoc() . ", objViaje= ".$this->getObjViaje(). " WHERE numdocPasajero=" . $this->getNrodoc() . " ";
+        $consultaModifica = "UPDATE pasajero SET numdocPasajero= ". $this->getNrodoc() . ", idviaje= ".$this->getObjViaje()->getIdviaje(). " WHERE numdocPasajero=" . $this->getNrodoc() . " ";
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaModifica)) {
                 $resp = true;

@@ -2,7 +2,7 @@
 <?php
 
 class Viaje {
-    private $idviaje;
+    private $idviaje; 
     private $vdestino;
     private $vcantmaxpasajeros;
     private $objResponsaje;
@@ -131,8 +131,8 @@ class Viaje {
                     $objRes = $row['rnumeroempleado'];
                     $importe = $row['vimporte'];
 
-                    $coleccionPasajero= $this->getColObjPasajero()[0]->listar("idViaje = ".$this->getIdViaje());
-                    //$colObPasajero = $pasajero->listar()
+                    $coleccionPasajero= $this->getColObjPasajero()[0]->listar("idViajePas = ".$this->getIdViaje());
+                    
                     $viaje = new Viaje();
                     //$idv, $dest, $cantmax, $objRes, $importe ,$colObjPasajero
                     $viaje->cargar($idv, $dest, $cantmax, $objRes, $importe, $coleccionPasajero);
@@ -154,7 +154,7 @@ class Viaje {
         $base = new BaseDatos();
         $resp = false;
         // Insertar el nuevo viaje en la tabla viaje
-        $consultaInsertar = "INSERT INTO viaje (vdestino, vcantmaxpasajeros, idempresa, rnumeroempleado, vimporte) VALUES ('" . $this->getVdestino() . "'," . $this->getVcantmaxpasajeros() . "," . $this->getIdempresa() . "," . $this->getRnumeroempleado() . "," . $this->getVimporte() . ")";
+        $consultaInsertar = "INSERT INTO viaje (vdestino, vcantmaxpasajeros, rnumeroempleado, vimporte) VALUES ('" . $this->getVdestino() . "','" . $this->getVcantmaxpasajeros() . "','" . $this->getObjResponsaje() . "','" . $this->getVimporte() . "')";
 
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaInsertar)) {
@@ -173,7 +173,7 @@ class Viaje {
         $resp = false;
         $base = new BaseDatos();
         // Modificar los datos del viaje en la tabla viaje
-        $consultaModifica = "UPDATE viaje SET vdestino='" . $this->getVdestino() . "', vcantmaxpasajeros=" . $this->getVcantmaxpasajeros() . ", rnumeroempleado=" . $this->getRnumeroempleado() . ", vimporte=" . $this->getVimporte() . " WHERE idviaje=" . $this->getIdviaje();
+        $consultaModifica = "UPDATE viaje SET vdestino='" . $this->getVdestino() . "', vcantmaxpasajeros=" . $this->getVcantmaxpasajeros() . ", rnumeroempleado=" . $this->getObjResponsaje() . ", vimporte=" . $this->getVimporte() . " WHERE idviaje=" . $this->getIdviaje();
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaModifica)) {
                 $resp = true;
@@ -218,7 +218,7 @@ class Viaje {
         $cadena = "ID Viaje: " . $this->getIdviaje() . "\n";
         $cadena .= "Destino: " . $this->getVdestino() . "\n";
         $cadena .= "Cantidad Máxima de Pasajeros: " . $this->getVcantmaxpasajeros() . "\n";
-        $cadena .= "Número de Empleado Responsable: " . $this->getRnumeroempleado() . "\n";
+        $cadena .= "Número de Empleado Responsable: " . $this->getObjResponsaje() . "\n";
         $cadena .= "Importe: " . $this->getVimporte() . "\n";
         $cadena .= "Pasajeros:\n".$this->cadenaPasajeros();
         return $cadena;

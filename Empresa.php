@@ -1,9 +1,9 @@
 <?php
 class Empresa {
-    private $idempresa;
-    private $enombre;
-    private $edireccion;
-    private $colViaje;
+    private $idempresa;//SQL
+    private $enombre;//SQL
+    private $edireccion;//SQL
+    private $colViaje; 
     private $mensajeoperacion;
 
     public function __construct(){
@@ -75,10 +75,11 @@ class Empresa {
         return $resp;
     }
 
-    public function cargar($idemp, $nom, $dir){
+    public function cargar($idemp, $nom, $dir, $colViajes){
         $this->setIdempresa($idemp);
         $this->setEnombre($nom);
         $this->setEdireccion($dir);
+        $this->setColViaje($colViajes);
     }
 
 
@@ -99,7 +100,9 @@ class Empresa {
                     $nom = $row['enombre'];
                     $dir = $row['edireccion'];
                     $empresa = new Empresa();
-                    $empresa->cargar($idemp, $nom, $dir);
+
+                    $colViajes = $this->getColViaje();
+                    $empresa->cargar($idemp, $nom, $dir, $colViajes);
                     array_push($arregloEmpresa, $empresa);
                 }
             } else {
@@ -169,7 +172,14 @@ class Empresa {
         return $resp;
     }
 
+    public function cadenaViajes(){
+        $cadena = "";
+        foreach ($this->getColViaje() as $viaje) {
+            $cadena .= $viaje ."\n";
+        }
+    }
+
     public function __toString(){
-        return "ID Empresa: " . $this->getIdempresa() . "\nNombre: " . $this->getEnombre() . "\nDirección: " . $this->getEdireccion() . "\n";
+        return "ID Empresa: " . $this->getIdempresa() . "\nNombre: " . $this->getEnombre() . "\nDirección: " . $this->getEdireccion() . "\nViajes:\n". $this->cadenaViajes()."\n";
     }
 }
