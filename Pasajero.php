@@ -1,41 +1,57 @@
 <?php
-include_once "BaseDatos.php";
+include_once 'BaseDatos.php';
 
-class Pasajero extends Persona {
+class Pasajero extends Persona
+{
     private $objViaje;
-    
-    
- 
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct(); // Llama al constructor de la clase padre (Persona)
-        $this->objViaje = "";
+        $this->objViaje = '';
     }
 
-    public function setObjViaje($objViaje){
+    public function setObjViaje($objViaje)
+    {
         $this->objViaje = $objViaje;
-        
     }
-    public function getObjViaje(){
+    public function getObjViaje()
+    {
         return $this->objViaje;
-        
     }
 
-    public function cargar($param){
+    public function cargar($param)
+    {
         parent::cargar($param);
         $this->setObjViaje($param['objViaje']);
     }
 
-    public function buscar($nrodoc){
-        
+    public function buscar($nrodoc)
+    {
         $base = new BaseDatos();
-        $consultaResponsable = "SELECT * FROM pasajero WHERE numdocPasajero = " . $nrodoc;
+        $consultaPasajero =
+            'SELECT * FROM pasajero WHERE numdocPasajero = ' . $nrodoc;
         $resp = false;
         if ($base->Iniciar()) {
-            if ($base->Ejecutar($consultaResponsable)) {
+            if ($base->Ejecutar($consultaPasajero)) {
                 if ($row = $base->Registro()) {
                     $this->setNrodoc($row['numdocPasajero']);
-                   
+
+                    $idViaje = $row['idViajePas'];
+                    $viaje = new Viaje();
+                    $viaje->buscar($idViaje);
+
+                    $this->setObjViaje($viaje);
+
+                    parent::buscar($row['numdocPasajero']);
+
+                    parent::cargar([
+                        'nrodoc' => $row['numdocPasajero'],
+                        'nomb' => parent::getNombre(),
+                        'ape' => parent::getApellido(),
+                        'tel' => parent::getTelefono(),
+                    ]);
+
                     $resp = true;
                 }
             } else {
@@ -47,25 +63,37 @@ class Pasajero extends Persona {
         return $resp;
     }
 
-    public function listar($condicion = ""){
+    public function listar($condicion = '')
+    {
         $arregloPasajero = null;
         $base = new BaseDatos();
-        $consultaPasajero = "SELECT * FROM pasajero ";
-        if ($condicion != "") {
+        $consultaPasajero = 'SELECT * FROM pasajero ';
+        if ($condicion != '') {
             $consultaPasajero = $consultaPasajero . ' WHERE ' . $condicion;
         }
-        $consultaPasajero .= " ORDER BY apellido ";
+        $consultaPasajero .= ' ORDER BY numdocPasajero ';
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaPasajero)) {
-                $arregloPasajero = array();
+                $arregloPasajero = [];
                 while ($row2 = $base->Registro()) {
-                    $NroDoc = $row2['nrodoc'];
-                    $idViaje = $row2['idViaje'];
-                    $pasajero = new Pasajero();
+                    $NroDoc = $row2['numdocPasajero'];
+                    $idViaje = $row2['idViajePas'];
 
-                    $persona = parent::listar("nrodoc = ".$NroDoc);
-                    $pasajero->cargar(['nomb'=> $persona["nomb"], 'nrodoc' => $NroDoc, 'ape'=> $persona["ape"], 'tel' => $persona["tel"], "objViaje"=>$idViaje]);
-                    
+                    $pasajero = new Pasajero();
+                    $persona = new Persona();
+                    $viaje = new Viaje();
+
+                    $viaje->buscar($idViaje);
+                    parent::buscar($NroDoc);
+
+                    $pasajero->cargar([
+                        'nomb' => parent::getNombre(),
+                        'nrodoc' => $NroDoc,
+                        'ape' => parent::getApellido(),
+                        'tel' => parent::getTelefono(),
+                        'objViaje' => $viaje,
+                    ]);
+
                     array_push($arregloPasajero, $pasajero);
                 }
             } else {
@@ -77,16 +105,20 @@ class Pasajero extends Persona {
         return $arregloPasajero;
     }
 
-
-
-    public function insertar(){
+    public function insertar()
+    {
         //Inserta los datos a la tabla persona
-        parent::insertar();
+        parent::insertar();  // AGREGAR UN IF 
 
         $base = new BaseDatos();
         $resp = false;
         // Se insertan los datos del pasajero en la tabla pasajero
-        $consultaInsertar = "INSERT INTO pasajero (numdocPasajero, idviaje) VALUES ('" . parent::getNrodoc() ."','" .$this->getObjViaje()->getIdviaje().")";
+        $consultaInsertar =
+            "INSERT INTO pasajero (numdocPasajero, idViajePas) VALUES ('" .
+            parent::getNrodoc() .
+            "','" .
+            $this->getObjViaje()->getIdviaje() .
+            "')";
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaInsertar)) {
                 $resp = true;
@@ -99,15 +131,20 @@ class Pasajero extends Persona {
         return $resp;
     }
 
-
-
-
-    public function modificar(){
+    public function modificar()
+    {
         parent::modificar();
         $resp = false;
         $base = new BaseDatos();
         // Se actualizan los datos del pasajero en la tabla pasajero
-        $consultaModifica = "UPDATE pasajero SET numdocPasajero= ". $this->getNrodoc() . ", idviaje= ".$this->getObjViaje()->getIdviaje(). " WHERE numdocPasajero=" . $this->getNrodoc() . " ";
+        $consultaModifica =
+            'UPDATE pasajero SET numdocPasajero= ' .
+            $this->getNrodoc() .
+            ', idViajePas= ' .
+            $this->getObjViaje()->getIdviaje() .
+            ' WHERE numdocPasajero=' .
+            $this->getNrodoc() .
+            ' ';
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaModifica)) {
                 $resp = true;
@@ -120,19 +157,20 @@ class Pasajero extends Persona {
         return $resp;
     }
 
-
-
-
-
-    public function eliminar(){
-        parent::eliminar();//preguntar si es necesario
+    public function eliminar()
+    {
         $base = new BaseDatos();
         $resp = false;
         // Se elimina el pasajero de la tabla pasajero
-        $consultaEliminar = "DELETE FROM pasajero WHERE numdocPasajero='" . $this->getNrodoc() . "'";
+        $consultaEliminar =
+            "DELETE FROM pasajero WHERE numdocPasajero='" .
+            $this->getNrodoc() .
+            "'";
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaEliminar)) {
+                if(parent::eliminar()){
                 $resp = true;
+                }
             } else {
                 $this->setMensajeOperacion($base->getError());
             }
@@ -142,15 +180,11 @@ class Pasajero extends Persona {
         return $resp;
     }
 
-
-
-
-
-    public function __toString(){
+    public function __toString()
+    {
         $resultado = parent::__toString(); // Obtener la representación de la clase padre (Persona)
-        $resultado.= "Viaje: \n".$this->getObjViaje();
-     
+        $resultado .= "Viaje: \n" . $this->getObjViaje();
+
         return $resultado;
     }
-    
 }
