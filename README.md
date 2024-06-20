@@ -11,7 +11,7 @@ Trabajo Practico Entregable de IPOO 2024
  Cire Ignacio
   * FAI-3321
 
-##Consigna
+## Consigna
 
 Una empresa de transporte desea gestionar la información correspondiente a los viajes que realiza. 
 De los pasajeros se conoce su nombre, apellido, número de documento y teléfono. 
