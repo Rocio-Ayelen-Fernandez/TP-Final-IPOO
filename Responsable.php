@@ -1,6 +1,8 @@
 <?php
 include_once "BaseDatos.php";
 
+include_once "Persona.php";
+
 class Responsable extends Persona {
     private $numeroEmpleado;
     private $numeroLicencia;
@@ -42,27 +44,25 @@ class Responsable extends Persona {
         if ($condicion != "") {
             $consultaResponsable = $consultaResponsable . ' WHERE ' . $condicion;
         }
-        $consultaResponsable .= " ORDER BY apellido ";
+        $consultaResponsable .= " ORDER BY numeroDocumentoRes ";
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaResponsable)) {
                 $arregloResponsable = array();
                 while ($row2 = $base->Registro()) {
-                    $NroDoc = $row2['nrodoc'];
+                    $NroDoc = $row2['numeroDocumentoRes'];
                     $numeroEmpleado = $row2['numeroEmpleado'];
                     $numeroLicencia = $row2['numeroLicencia'];
                     
-                    $Responsable = new Responsable();   
-                    $persona = parent::listar("nrodoc = ".$NroDoc);
-                    /**
-                     *  CLAVES PARAM
-                     *   $this->setNrodoc($param['nrodoc']);
-                     *   $this->setNombre($param['nomb']);
-                     *   $this->setApellido($param['ape']);
-                     *   $this->setTelefono($param['tel']);
-                     */
+                    $Responsable = new Responsable(); 
+                    
+                    parent::buscar($NroDoc);
 
-                    //['nomb'=>$Nombre, 'nrodoc' => $NroDoc, 'ape' => $Apellido, 'tel' => $Telefono]
-                    $Responsable->cargar(['nrodoc' => $NroDoc, 'nomb'=> $persona["nomb"], 'ape'=> $persona["ape"], 'tel' => $persona["tel"]]);   
+                    $Responsable->cargar(['nrodoc' => $NroDoc, 
+                    'nomb'=> parent::getNombre(), 
+                    'ape'=> parent::getApellido(), 
+                    'tel' => parent::getTelefono(), 
+                    'numEmpleado' => $numeroEmpleado, 
+                    'numLicencia' => $numeroLicencia  ]);   
                     array_push($arregloResponsable, $Responsable);
                 }
             } else {
@@ -76,11 +76,13 @@ class Responsable extends Persona {
 
     public function buscar($nrodoc){
         $base = new BaseDatos();
-        $consultaResponsable = "SELECT * FROM responsable WHERE numeroDocumentoRes = " . parent::getNrodoc();
+        $consultaResponsable = "SELECT * FROM responsable WHERE numeroDocumentoRes = " .$nrodoc;
         $resp = false;
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaResponsable)) {
-                if ($row = $base->Registro()) {
+                if ($row = $base->Registro()){
+
+                    parent::buscar($row['numeroDocumentoRes']);
                     $this->setNrodoc($row['numeroDocumentoRes']);
                     $this->setNumeroEmpleado($row['numeroEmpleado']);
                     $this->setNumeroLicencia($row['numeroLicencia']);
@@ -99,7 +101,7 @@ class Responsable extends Persona {
         parent::insertar(); // Asegura que la inserción en Persona se realice primero
         $base = new BaseDatos();
         $resp = false;
-        $consultaInsertar = "INSERT INTO responsable (numeroDocumentoRes, numeroEmpleado, numeroLicencia) VALUES ('" . $this->getNrodoc() . "','" . $this->getNumeroEmpleado() . "','" . $this->getNumeroLicencia() . "')";
+        $consultaInsertar = "INSERT INTO responsable (numeroDocumentoRes, numeroEmpleado, numeroLicencia) VALUES (" . $this->getNrodoc() . "," . $this->getNumeroEmpleado() . "," . $this->getNumeroLicencia() . ")";
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaInsertar)) {
                 $resp = true;
@@ -135,7 +137,9 @@ class Responsable extends Persona {
         $consultaEliminar = "DELETE FROM responsable WHERE numeroDocumentoRes=" . $this->getNrodoc();
         if ($base->Iniciar()) {
             if ($base->Ejecutar($consultaEliminar)) {
-                $resp = true;
+                if(parent::eliminar()){
+                    $resp = true;
+                    }
             } else {
                 $this->setMensajeOperacion($base->getError());
             }
