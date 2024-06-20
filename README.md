@@ -1,5 +1,5 @@
-# Viaje-Feliz
-Trabajo Practico Entregable de IPOO 2024
+# TP FINAL IPOO
+Trabajo Practico Final de IPOO 2024
 
 ## Grupo 19
  Fernandez Rocio
